@@ -4,13 +4,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	d "github.com/studio-b12/gowebdav"
 	"io"
 	"os"
 	"os/user"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	d "github.com/SamuAlfageme/gowebdav"
 )
 
 func main() {

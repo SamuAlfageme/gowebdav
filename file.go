@@ -15,6 +15,8 @@ type File struct {
 	modified    time.Time
 	etag        string
 	isdir       bool
+	ocID        int64
+	permissions string
 }
 
 // Path returns the full path of a file
@@ -62,6 +64,17 @@ func (f File) IsDir() bool {
 	return f.isdir
 }
 
+// ID returns the ocID of a file
+func (f File) ID() int64 {
+	return f.ocID
+}
+
+// Permissions return the permission set of a file as defined in
+// https://github.com/owncloud/client/blob/master/src/common/remotepermissions.h#L43-L61
+func (f File) Permissions() string {
+	return f.permissions
+}
+
 // Sys ????
 func (f File) Sys() interface{} {
 	return nil
@@ -73,5 +86,5 @@ func (f File) String() string {
 		return fmt.Sprintf("Dir : '%s' - '%s'", f.path, f.name)
 	}
 
-	return fmt.Sprintf("File: '%s' SIZE: %d MODIFIED: %s ETAG: %s CTYPE: %s", f.path, f.size, f.modified.String(), f.etag, f.contentType)
+	return fmt.Sprintf("File: '%s' SIZE: %d MODIFIED: %s ETAG: %s CTYPE: %s OCID: %d PERMISSIONS: %s", f.path, f.size, f.modified.String(), f.etag, f.contentType, f.ocID, f.permissions)
 }

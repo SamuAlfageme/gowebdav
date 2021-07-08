@@ -96,13 +96,20 @@ func (c *Client) Connect() error {
 }
 
 type props struct {
-	Status      string   `xml:"DAV: status"`
-	Name        string   `xml:"DAV: prop>displayname,omitempty"`
-	Type        xml.Name `xml:"DAV: prop>resourcetype>collection,omitempty"`
-	Size        string   `xml:"DAV: prop>getcontentlength,omitempty"`
-	ContentType string   `xml:"DAV: prop>getcontenttype,omitempty"`
-	ETag        string   `xml:"DAV: prop>getetag,omitempty"`
-	Modified    string   `xml:"DAV: prop>getlastmodified,omitempty"`
+	Status                string   `xml:"DAV: status"`
+	Name                  string   `xml:"DAV: prop>displayname,omitempty"`
+	Type                  xml.Name `xml:"DAV: prop>resourcetype>collection,omitempty"`
+	Size                  string   `xml:"DAV: prop>getcontentlength,omitempty"`
+	ContentType           string   `xml:"DAV: prop>getcontenttype,omitempty"`
+	ETag                  string   `xml:"DAV: prop>getetag,omitempty"`
+	Modified              string   `xml:"DAV: prop>getlastmodified,omitempty"`
+	OcID                  string   `xml:"http://owncloud.org/ns prop>id"`
+	DownloadURL           string   `xml:"http://owncloud.org/ns prop>downloadURL,omitempty"`
+	DirectDownloadCookies string   `xml:"http://owncloud.org/ns prop>dDC,omitempty"`
+	Permissions           string   `xml:"http://owncloud.org/ns prop>permissions"`
+	Checksums             string   `xml:"http://owncloud.org/ns prop>checksums,omitempty"`
+	DataFingerPrint       string   `xml:"http://owncloud.org/ns prop>data-fingerprint,omitempty"`
+	ShareTypes            string   `xml:"http://owncloud.org/ns prop>share-types,omitempty"`
 }
 
 type response struct {
@@ -147,6 +154,8 @@ func (c *Client) ReadDir(path string) ([]os.FileInfo, error) {
 			f.modified = parseModified(&p.Modified)
 			f.etag = p.ETag
 			f.contentType = p.ContentType
+			f.ocID = parseInt64(&p.OcID)
+			f.permissions = p.Permissions
 
 			if p.Type.Local == "collection" {
 				f.path += "/"
@@ -165,7 +174,7 @@ func (c *Client) ReadDir(path string) ([]os.FileInfo, error) {
 	}
 
 	err := c.propfind(path, false,
-		`<d:propfind xmlns:d='DAV:'>
+		`<d:propfind xmlns:d='DAV:' xmlns:oc='http://owncloud.org/ns'>
 			<d:prop>
 				<d:displayname/>
 				<d:resourcetype/>
@@ -173,6 +182,13 @@ func (c *Client) ReadDir(path string) ([]os.FileInfo, error) {
 				<d:getcontenttype/>
 				<d:getetag/>
 				<d:getlastmodified/>
+				<oc:id />
+				<oc:downloadURL />
+				<oc:dDC />
+				<oc:permissions />
+				<oc:checksums />
+				<oc:data-fingerprint />
+				<oc:share-types />
 			</d:prop>
 		</d:propfind>`,
 		&response{},
@@ -217,7 +233,7 @@ func (c *Client) Stat(path string) (os.FileInfo, error) {
 	}
 
 	err := c.propfind(path, true,
-		`<d:propfind xmlns:d='DAV:'>
+		`<d:propfind xmlns:d='DAV:' xmlns:oc='http://owncloud.org/ns'>
 			<d:prop>
 				<d:displayname/>
 				<d:resourcetype/>
@@ -225,6 +241,13 @@ func (c *Client) Stat(path string) (os.FileInfo, error) {
 				<d:getcontenttype/>
 				<d:getetag/>
 				<d:getlastmodified/>
+				<oc:id />
+				<oc:downloadURL />
+				<oc:dDC />
+				<oc:permissions />
+				<oc:checksums />
+				<oc:data-fingerprint />
+				<oc:share-types />
 			</d:prop>
 		</d:propfind>`,
 		&response{},
